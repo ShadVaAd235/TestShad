@@ -51,6 +51,24 @@
     }
     .hero h1{margin:0;font-size:clamp(28px,4vw,44px);color:#f3ead3}
     .hero p{margin:.45rem 0 0;color:var(--muted)}
+    .hero-top{display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
+    .lang-switch{display:flex;gap:6px;flex:none}
+    .lang-btn{
+      min-width:46px;
+      min-height:38px;
+      border:1px solid #5f4a22;
+      border-radius:9px;
+      background:#12171b;
+      color:#c6cbd0;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .lang-btn.active{
+      color:#1b1308;
+      background:linear-gradient(180deg,#efc66b,#c99538);
+      border-color:#f3d483;
+      box-shadow:0 5px 14px rgba(212,166,74,.14);
+    }
 
     .resource-bar{
       display:grid;
@@ -262,6 +280,8 @@
     @media (max-width:700px){
       .wrap{padding:12px}
       .hero{padding:18px}
+      .hero-top{flex-direction:column}
+      .lang-switch{align-self:flex-end}
       .resource-bar{grid-template-columns:1fr;align-items:stretch}
       .resource-input{width:100%;justify-self:stretch}
       .row{align-items:stretch;flex-direction:column}
@@ -274,14 +294,22 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <h1>Héritage héroïque</h1>
-    <p>Optimisez vos transferts de héros et économisez vos fragments légendaires universels.</p>
+    <div class="hero-top">
+      <div>
+        <h1 id="uiTitle">Héritage héroïque</h1>
+        <p id="uiSubtitle">Optimisez vos transferts de héros et économisez vos fragments légendaires universels.</p>
+      </div>
+      <div class="lang-switch" aria-label="Language">
+        <button id="langFr" class="lang-btn active" type="button">FR</button>
+        <button id="langEn" class="lang-btn" type="button">EN</button>
+      </div>
+    </div>
   </header>
 
   <section class="resource-bar">
     <div>
-      <div class="resource-title">Fragments légendaires universels</div>
-      <div class="resource-help">Saisissez le nombre de fragments légendaires universels disponibles dans votre sac.</div>
+      <div id="uiUniversalTitle" class="resource-title">Fragments légendaires universels</div>
+      <div id="uiUniversalHelp" class="resource-help">Saisissez le nombre de fragments légendaires universels disponibles dans votre sac.</div>
     </div>
     <div class="resource-input">
       <input id="universal" type="number" min="0" step="1" value="100" aria-label="Fragments légendaires universels disponibles">
@@ -292,8 +320,8 @@
     <section class="panel gold-edge">
       <div class="panel-head">
         <div>
-          <h2>Héros utilisé pour le transfert</h2>
-          <div class="sub">Ajoutez jusqu’à 4 héros donneurs.</div>
+          <h2 id="uiDonorTitle">Héros utilisé pour le transfert</h2>
+          <div id="uiDonorSub" class="sub">Ajoutez jusqu’à 4 héros donneurs.</div>
         </div>
         <button id="addDonor" class="btn gold-outline" type="button">+ Ajouter</button>
       </div>
@@ -309,8 +337,8 @@
     <section class="panel gold-edge">
       <div class="panel-head">
         <div>
-          <h2>Héros à développer</h2>
-          <div class="sub">Ajoutez jusqu’à 4 receveurs et définissez leur priorité.</div>
+          <h2 id="uiReceiverTitle">Héros à développer</h2>
+          <div id="uiReceiverSub" class="sub">Ajoutez jusqu’à 4 receveurs et définissez leur priorité.</div>
         </div>
         <button id="addReceiver" class="btn gold-outline" type="button">+ Ajouter</button>
       </div>
@@ -318,7 +346,7 @@
     </section>
   </main>
 
-  <p class="disclaimer">
+  <p id="uiDisclaimer" class="disclaimer">
     Certains héros ne sont pas éligibles à Héritage héroïque : Catherine, Maître Jin, Jaden, Maxine, Norah ainsi que les héros de collaboration spéciale.
     Les héros S ne sont éligibles que si leur arme apocalyptique n’a pas été améliorée.
   </p>
@@ -339,6 +367,98 @@
   const sSet = new Set(sHeroes);
   const costs = [10,10,15,15,25,30,35,40,40,45,50,55,70,75,80,85];
 
+  const i18n = {
+    fr: {
+      title:'Héritage héroïque',
+      subtitle:'Optimisez vos transferts de héros et économisez vos fragments légendaires universels.',
+      universalTitle:'Fragments légendaires universels',
+      universalHelp:'Saisissez le nombre de fragments légendaires universels disponibles dans votre sac.',
+      universalAria:'Fragments légendaires universels disponibles',
+      donorTitle:'Héros utilisé pour le transfert',
+      donorSub:'Ajoutez jusqu’à 4 héros donneurs.',
+      receiverTitle:'Héros à développer',
+      receiverSub:'Ajoutez jusqu’à 4 receveurs et définissez leur priorité.',
+      add:'+ Ajouter',
+      legendaryHero:'Héros légendaire',
+      sHero:'Héros S',
+      none:'Aucun',
+      remove:'Retirer',
+      sWarning:'⚠️ Héros S sélectionné : vérifiez que son arme apocalyptique n’a pas été améliorée. Sinon, ce héros n’est pas éligible à Héritage héroïque.',
+      skills:'Compétences',
+      dedicated:'Fragments dédiés',
+      priority:'Priorité',
+      disclaimer:'Certains héros ne sont pas éligibles à Héritage héroïque : Catherine, Maître Jin, Jaden, Maxine, Norah ainsi que les héros de collaboration spéciale. Les héros S ne sont éligibles que si leur arme apocalyptique n’a pas été améliorée.',
+      optimize:'Optimiser les transferts',
+      reset:'Réinitialiser',
+      addRequired:'Ajoutez au moins un donneur et un héros à développer.',
+      duplicateHero:' est sélectionné plusieurs fois.',
+      duplicatePriority:'La priorité {n} est utilisée plusieurs fois.',
+      calculationDone:'Calcul terminé : {n} transfert(s), {u} fragments universels utilisés.',
+      plan:'Plan recommandé',
+      planSub:'Les receveurs sont optimisés dans leur ordre de priorité.',
+      transfers:'transferts',
+      remaining:'restants',
+      priorityWord:'Priorité',
+      noUseful:'Aucun transfert utile retenu. Progression conservée :',
+      before:'Avant le transfert',
+      after:'Après le transfert',
+      dedicatedUsed:'fragments dédiés',
+      universalShort:'universels',
+      dedicatedRemaining:'Dédiés restants :',
+      oldAbsorbed:'Ancienne progression {x} absorbée.',
+      result:'Résultat',
+      universalsUsed:'Universels utilisés :',
+      donorReset:'Donneur remis à 1-1-1-1',
+      transferTitle:'Transfert'
+    },
+    en: {
+      title:'Heroic Legacy',
+      subtitle:'Optimize your hero transfers and save your universal Legendary Fragments.',
+      universalTitle:'Universal Legendary Fragments',
+      universalHelp:'Enter the number of universal Legendary Fragments available in your inventory.',
+      universalAria:'Universal Legendary Fragments available',
+      donorTitle:'Hero used for the transfer',
+      donorSub:'Add up to 4 donor heroes.',
+      receiverTitle:'Hero to develop',
+      receiverSub:'Add up to 4 receiving heroes and set their priority.',
+      add:'+ Add',
+      legendaryHero:'Legendary Hero',
+      sHero:'S Hero',
+      none:'None',
+      remove:'Remove',
+      sWarning:'⚠️ S Hero selected: make sure their Apocalyptic Weapon has not been upgraded. Otherwise, this hero is not eligible for Heroic Legacy.',
+      skills:'Skills',
+      dedicated:'Dedicated Fragments',
+      priority:'Priority',
+      disclaimer:'Some heroes are not eligible for Heroic Legacy: Catherine, Master Jin, Jaden, Maxine, Norah, as well as special collaboration heroes. S Heroes are eligible only if their Apocalyptic Weapon has not been upgraded.',
+      optimize:'Optimize transfers',
+      reset:'Reset',
+      addRequired:'Add at least one donor and one hero to develop.',
+      duplicateHero:' is selected more than once.',
+      duplicatePriority:'Priority {n} is used more than once.',
+      calculationDone:'Calculation complete: {n} transfer(s), {u} universal fragments used.',
+      plan:'Recommended plan',
+      planSub:'Receiving heroes are optimized in the selected priority order.',
+      transfers:'transfers',
+      remaining:'remaining',
+      priorityWord:'Priority',
+      noUseful:'No useful transfer retained. Current progress kept:',
+      before:'Before transfer',
+      after:'After transfer',
+      dedicatedUsed:'dedicated fragments',
+      universalShort:'universal',
+      dedicatedRemaining:'Dedicated remaining:',
+      oldAbsorbed:'Previous progress {x} absorbed.',
+      result:'Result',
+      universalsUsed:'Universal fragments used:',
+      donorReset:'Donor reset to 1-1-1-1',
+      transferTitle:'Transfer'
+    }
+  };
+
+  let lang = 'fr';
+  const t = key => i18n[lang][key] ?? key;
+
   const donorsEl = document.getElementById('donors');
   const receiversEl = document.getElementById('receivers');
   const universalEl = document.getElementById('universal');
@@ -346,15 +466,20 @@
   const messageEl = document.getElementById('message');
   const addDonorBtn = document.getElementById('addDonor');
   const addReceiverBtn = document.getElementById('addReceiver');
+  const optimizeBtn = document.getElementById('optimize');
+  const resetBtn = document.getElementById('reset');
+  const langFrBtn = document.getElementById('langFr');
+  const langEnBtn = document.getElementById('langEn');
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fmt = (str, vars={}) => Object.entries(vars).reduce((acc,[k,v]) => acc.replaceAll(`{${k}}`, v), str);
 
   function legendaryOptions(selected='') {
-    return `<option value="">Aucun</option>${legendary.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
+    return `<option value="">${t('none')}</option>${legendary.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
   }
 
   function sHeroOptions(selected='') {
-    return `<option value="">Aucun</option>${sHeroes.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
+    return `<option value="">${t('none')}</option>${sHeroes.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
   }
 
   function skillOptions(v) {
@@ -364,6 +489,16 @@
   function syncButtons() {
     addDonorBtn.disabled = donorsEl.children.length >= 4;
     addReceiverBtn.disabled = receiversEl.children.length >= 4;
+  }
+
+  function snapshotCards(kind) {
+    const host = kind === 'receiver' ? receiversEl : donorsEl;
+    return [...host.querySelectorAll('.card')].map(card => ({
+      hero: card.querySelector('.hero-legendary').value || card.querySelector('.hero-s').value,
+      skills: [...card.querySelectorAll('.skill')].map(s => Number(s.value)),
+      dedicated: Math.max(0, Math.floor(Number(card.querySelector('.dedicated').value)||0)),
+      priority: kind === 'receiver' ? Number(card.querySelector('.priority').value) : null
+    }));
   }
 
   function makeCard(kind, data={}) {
@@ -378,23 +513,21 @@
     card.innerHTML = `
       <div class="row">
         <div class="grow hero-choice-grid">
-          <label>Héros légendaire
+          <label>${t('legendaryHero')}
             <select class="hero-legendary">${legendaryOptions((data.hero && !sSet.has(data.hero)) ? data.hero : '')}</select>
           </label>
-          <label>Héros S
+          <label>${t('sHero')}
             <select class="hero-s">${sHeroOptions((data.hero && sSet.has(data.hero)) ? data.hero : '')}</select>
           </label>
         </div>
-        <button class="btn remove" type="button">Retirer</button>
+        <button class="btn remove" type="button">${t('remove')}</button>
       </div>
 
-      <div class="warning hidden">
-        ⚠️ <strong>Héros S sélectionné :</strong> vérifiez que son arme apocalyptique n’a pas été améliorée. Sinon, ce héros n’est pas éligible à Héritage héroïque.
-      </div>
+      <div class="warning hidden">${t('sWarning')}</div>
 
       <div class="data-grid ${isReceiver?'receiver':'donor'}">
         <div class="data-box">
-          <div class="data-label">Compétences</div>
+          <div class="data-label">${t('skills')}</div>
           <div class="skills">
             ${skills.map((v,i)=>`
               <label class="skill-label">C${i+1}
@@ -404,13 +537,13 @@
         </div>
 
         <div class="data-box goldish">
-          <div class="data-label">Fragments dédiés</div>
+          <div class="data-label">${t('dedicated')}</div>
           <input class="dedicated" type="number" min="0" step="1" value="${Math.max(0,Number(data.dedicated||0))}">
         </div>
 
         ${isReceiver ? `
           <div class="data-box goldish">
-            <div class="data-label">Priorité</div>
+            <div class="data-label">${t('priority')}</div>
             <select class="priority">
               ${[1,2,3,4].map(p=>`<option value="${p}" ${p===(data.priority||defaultPriority)?'selected':''}>${p}</option>`).join('')}
             </select>
@@ -440,6 +573,7 @@
       card.remove();
       syncButtons();
     });
+
     refreshWarning();
     syncButtons();
   }
@@ -467,13 +601,7 @@
   }
 
   function readCards(kind) {
-    const host = kind === 'receiver' ? receiversEl : donorsEl;
-    return [...host.querySelectorAll('.card')].map(card => ({
-      hero: card.querySelector('.hero-legendary').value || card.querySelector('.hero-s').value,
-      skills: [...card.querySelectorAll('.skill')].map(s => Number(s.value)),
-      dedicated: Math.max(0, Math.floor(Number(card.querySelector('.dedicated').value)||0)),
-      priority: kind === 'receiver' ? Number(card.querySelector('.priority').value) : null
-    })).filter(x => x.hero);
+    return snapshotCards(kind).filter(x => x.hero);
   }
 
   function simulateAfter(startSkills,dedicated,universal) {
@@ -584,9 +712,9 @@
           <div class="result-card">
             <div class="result-top">
               <strong>${esc(s.receiver.hero)}</strong>
-              <span class="chip gold">Priorité ${s.receiver.priority}</span>
+              <span class="chip gold">${t('priorityWord')} ${s.receiver.priority}</span>
             </div>
-            <p class="small">Aucun transfert utile retenu. Progression conservée : <strong>${skillText(s.receiver.skills)}</strong>.</p>
+            <p class="small">${t('noUseful')} <strong>${skillText(s.receiver.skills)}</strong>.</p>
           </div>`;
       }
 
@@ -601,32 +729,32 @@
               <span class="count-badge">${rank}</span>
               <strong>${esc(s.donor.hero)} → ${esc(s.receiver.hero)}</strong>
             </div>
-            <span class="chip gold">Priorité ${s.receiver.priority}</span>
+            <span class="chip gold">${t('priorityWord')} ${s.receiver.priority}</span>
           </div>
 
           <div class="result-grid">
             <div class="result-box">
-              <strong>Avant le transfert — ${esc(s.donor.hero)}</strong>
+              <strong>${t('before')} — ${esc(s.donor.hero)}</strong>
               <div style="margin-top:7px;font-size:1rem">${skillText(s.donor.skills)} → <strong>${skillText(s.transferSkills)}</strong></div>
-              <div class="small" style="margin-top:8px">${s.donorDedUsed} fragments dédiés${s.uniPre?` + ${s.uniPre} universels`:''}</div>
-              <div class="small">Dédiés restants : ${donorRemain}</div>
+              <div class="small" style="margin-top:8px">${s.donorDedUsed} ${t('dedicatedUsed')}${s.uniPre?` + ${s.uniPre} ${t('universalShort')}`:''}</div>
+              <div class="small">${t('dedicatedRemaining')} ${donorRemain}</div>
             </div>
 
             <div class="result-arrow">→</div>
 
             <div class="result-box">
-              <strong>Après le transfert — ${esc(s.receiver.hero)}</strong>
-              <div class="small" style="margin-top:7px">Ancienne progression ${skillText(s.receiver.skills)} absorbée.</div>
+              <strong>${t('after')} — ${esc(s.receiver.hero)}</strong>
+              <div class="small" style="margin-top:7px">${fmt(t('oldAbsorbed'),{x:skillText(s.receiver.skills)})}</div>
               <div style="margin-top:4px;font-size:1rem">${skillText(s.transferSkills)} → <strong>${skillText(s.finalSkills)}</strong></div>
-              <div class="small" style="margin-top:8px">${s.receiverDedUsed} fragments dédiés${s.uniPost?` + ${s.uniPost} universels`:''}</div>
-              <div class="small">Dédiés restants : ${receiverRemain}</div>
+              <div class="small" style="margin-top:8px">${s.receiverDedUsed} ${t('dedicatedUsed')}${s.uniPost?` + ${s.uniPost} ${t('universalShort')}`:''}</div>
+              <div class="small">${t('dedicatedRemaining')} ${receiverRemain}</div>
             </div>
           </div>
 
           <div class="result-chips">
-            <span class="chip">Résultat ${s.finalProgress}/16</span>
-            <span class="chip gold">Universels utilisés : ${s.totalUni}</span>
-            <span class="chip">Donneur remis à 1-1-1-1</span>
+            <span class="chip">${t('result')} ${s.finalProgress}/16</span>
+            <span class="chip gold">${t('universalsUsed')} ${s.totalUni}</span>
+            <span class="chip">${t('donorReset')}</span>
           </div>
         </div>`;
     }).join('');
@@ -635,28 +763,61 @@
       <div class="panel gold-edge">
         <div class="result-top">
           <div>
-            <h2>Plan recommandé</h2>
-            <div class="sub">Les receveurs sont optimisés dans leur ordre de priorité.</div>
+            <h2>${t('plan')}</h2>
+            <div class="sub">${t('planSub')}</div>
           </div>
           <div style="text-align:right;font-size:.9rem">
-            <div><strong>${plan.transfers}/4</strong> transferts</div>
-            <div>${startUniversal} universels → <strong style="color:var(--gold2)">${plan.remainingUni}</strong> restants</div>
+            <div><strong>${plan.transfers}/4</strong> ${t('transfers')}</div>
+            <div>${startUniversal} ${t('universalShort')} → <strong style="color:var(--gold2)">${plan.remainingUni}</strong> ${t('remaining')}</div>
           </div>
         </div>
       </div>
       ${blocks}`;
   }
 
-  addDonorBtn.addEventListener('click',()=>makeCard('donor'));
-  addReceiverBtn.addEventListener('click',()=>makeCard('receiver'));
+  function applyLanguage(rebuild=true) {
+    document.documentElement.lang = lang;
+    document.title = t('title');
+    document.getElementById('uiTitle').textContent = t('title');
+    document.getElementById('uiSubtitle').textContent = t('subtitle');
+    document.getElementById('uiUniversalTitle').textContent = t('universalTitle');
+    document.getElementById('uiUniversalHelp').textContent = t('universalHelp');
+    universalEl.setAttribute('aria-label', t('universalAria'));
+    document.getElementById('uiDonorTitle').textContent = t('donorTitle');
+    document.getElementById('uiDonorSub').textContent = t('donorSub');
+    document.getElementById('uiReceiverTitle').textContent = t('receiverTitle');
+    document.getElementById('uiReceiverSub').textContent = t('receiverSub');
+    document.getElementById('uiDisclaimer').textContent = t('disclaimer');
+    addDonorBtn.textContent = t('add');
+    addReceiverBtn.textContent = t('add');
+    optimizeBtn.textContent = t('optimize');
+    resetBtn.textContent = t('reset');
+    const badge = document.querySelector('.transfer-badge');
+    if (badge) badge.title = t('transferTitle');
 
-  document.getElementById('optimize').addEventListener('click',()=>{
+    langFrBtn.classList.toggle('active', lang === 'fr');
+    langEnBtn.classList.toggle('active', lang === 'en');
+
+    if (rebuild) {
+      const donors = snapshotCards('donor');
+      const receivers = snapshotCards('receiver');
+      const hadResults = !resultsEl.classList.contains('hidden');
+      donorsEl.innerHTML = '';
+      receiversEl.innerHTML = '';
+      donors.forEach(d => makeCard('donor', d));
+      receivers.forEach(r => makeCard('receiver', r));
+      if (hadResults) runOptimize();
+      else messageEl.textContent = '';
+    }
+  }
+
+  function runOptimize() {
     const donors = readCards('donor');
     const receivers = readCards('receiver');
     const universal = Math.max(0,Math.floor(Number(universalEl.value)||0));
 
     if (!donors.length || !receivers.length) {
-      messageEl.textContent='Ajoutez au moins un donneur et un héros à développer.';
+      messageEl.textContent = t('addRequired');
       resultsEl.classList.add('hidden');
       return;
     }
@@ -664,7 +825,7 @@
     const names=[...donors,...receivers].map(x=>x.hero);
     const duplicate=names.find((n,i)=>names.indexOf(n)!==i);
     if (duplicate) {
-      messageEl.textContent=`${duplicate} est sélectionné plusieurs fois.`;
+      messageEl.textContent = `${duplicate}${t('duplicateHero')}`;
       resultsEl.classList.add('hidden');
       return;
     }
@@ -672,17 +833,21 @@
     const priorities=receivers.map(r=>r.priority);
     const duplicatePriority=priorities.find((p,i)=>priorities.indexOf(p)!==i);
     if (duplicatePriority) {
-      messageEl.textContent=`La priorité ${duplicatePriority} est utilisée plusieurs fois.`;
+      messageEl.textContent = fmt(t('duplicatePriority'),{n:duplicatePriority});
       resultsEl.classList.add('hidden');
       return;
     }
 
     const plan=solve(receivers,donors,universal);
     render(plan,universal);
-    messageEl.textContent=`Calcul terminé : ${plan.transfers} transfert(s), ${plan.totalUni} fragments universels utilisés.`;
-  });
+    messageEl.textContent = fmt(t('calculationDone'),{n:plan.transfers,u:plan.totalUni});
+  }
 
-  document.getElementById('reset').addEventListener('click',()=>{
+  addDonorBtn.addEventListener('click',()=>makeCard('donor'));
+  addReceiverBtn.addEventListener('click',()=>makeCard('receiver'));
+  optimizeBtn.addEventListener('click',runOptimize);
+
+  resetBtn.addEventListener('click',()=>{
     donorsEl.innerHTML='';
     receiversEl.innerHTML='';
     resultsEl.innerHTML='';
@@ -693,8 +858,12 @@
     makeCard('receiver',{priority:1});
   });
 
+  langFrBtn.addEventListener('click',()=>{ if(lang!=='fr'){ lang='fr'; applyLanguage(true); } });
+  langEnBtn.addEventListener('click',()=>{ if(lang!=='en'){ lang='en'; applyLanguage(true); } });
+
   makeCard('donor');
   makeCard('receiver',{priority:1});
+  applyLanguage(false);
 })();
 </script>
 </body>
