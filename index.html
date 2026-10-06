@@ -126,6 +126,12 @@
     }
     .row{display:flex;gap:10px;align-items:flex-end}
     .grow{flex:1;min-width:0}
+.hero-choice-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      min-width:0;
+    }
     label{display:block;font-size:.88rem;font-weight:700}
     input,select,button{font:inherit}
     input,select{
@@ -338,14 +344,12 @@
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-  function heroOptions(selected='') {
-    return `<option value="">Sélectionner…</option>
-      <optgroup label="Héros légendaires">
-        ${legendary.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}
-      </optgroup>
-      <optgroup label="Héros S">
-        ${sHeroes.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}
-      </optgroup>`;
+  function legendaryOptions(selected='') {
+    return `<option value="">Aucun</option>${legendary.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
+  }
+
+  function sHeroOptions(selected='') {
+    return `<option value="">Aucun</option>${sHeroes.map(h => `<option value="${esc(h)}" ${h===selected?'selected':''}>${esc(h)}</option>`).join('')}`;
   }
 
   function skillOptions(v) {
@@ -368,9 +372,14 @@
 
     card.innerHTML = `
       <div class="row">
-        <label class="grow">Héros
-          <select class="hero-select">${heroOptions(data.hero || '')}</select>
-        </label>
+        <div class="grow hero-choice-grid">
+          <label>Héros légendaire
+            <select class="hero-legendary">${legendaryOptions((data.hero && !sSet.has(data.hero)) ? data.hero : '')}</select>
+          </label>
+          <label>Héros S
+            <select class="hero-s">${sHeroOptions((data.hero && sSet.has(data.hero)) ? data.hero : '')}</select>
+          </label>
+        </div>
         <button class="btn remove" type="button">Retirer</button>
       </div>
 
@@ -406,10 +415,22 @@
 
     host.appendChild(card);
 
-    const heroSel = card.querySelector('.hero-select');
+    const legendarySel = card.querySelector('.hero-legendary');
+    const sSel = card.querySelector('.hero-s');
     const warning = card.querySelector('.warning');
-    const refreshWarning = () => warning.classList.toggle('hidden', !sSet.has(heroSel.value));
-    heroSel.addEventListener('change', refreshWarning);
+
+    const refreshWarning = () => warning.classList.toggle('hidden', !sSel.value);
+
+    legendarySel.addEventListener('change', () => {
+      if (legendarySel.value) sSel.value = '';
+      refreshWarning();
+    });
+
+    sSel.addEventListener('change', () => {
+      if (sSel.value) legendarySel.value = '';
+      refreshWarning();
+    });
+
     card.querySelector('.remove').addEventListener('click', () => {
       card.remove();
       syncButtons();
@@ -443,7 +464,7 @@
   function readCards(kind) {
     const host = kind === 'receiver' ? receiversEl : donorsEl;
     return [...host.querySelectorAll('.card')].map(card => ({
-      hero: card.querySelector('.hero-select').value,
+      hero: card.querySelector('.hero-legendary').value || card.querySelector('.hero-s').value,
       skills: [...card.querySelectorAll('.skill')].map(s => Number(s.value)),
       dedicated: Math.max(0, Math.floor(Number(card.querySelector('.dedicated').value)||0)),
       priority: kind === 'receiver' ? Number(card.querySelector('.priority').value) : null
@@ -667,8 +688,8 @@
     makeCard('receiver',{priority:1});
   });
 
-  makeCard('donor',{hero:'Peter Karelin',skills:[5,5,5,3],dedicated:35});
-  makeCard('receiver',{hero:'Julien',skills:[2,1,1,1],dedicated:14,priority:1});
+  makeCard('donor');
+  makeCard('receiver',{priority:1});
 })();
 </script>
 </body>
