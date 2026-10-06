@@ -53,10 +53,10 @@
     .hero p{margin:.45rem 0 0;color:var(--muted)}
 
     .resource-bar{
-      display:flex;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 240px;
       gap:18px;
       align-items:center;
-      justify-content:space-between;
       border:1px solid #4a3a1f;
       background:linear-gradient(180deg,#171b1f,#111417);
       border-radius:14px;
@@ -66,7 +66,10 @@
     }
     .resource-title{font-weight:800;color:#f0dfb6}
     .resource-help{font-size:.84rem;color:var(--muted);margin-top:3px}
-    .resource-input{width:210px;flex:none}
+    .resource-input{
+      width:240px;
+      justify-self:start;
+    }
 
     .panel{
       border:1px solid var(--border);
@@ -89,7 +92,9 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:290px;
+      align-self:stretch;
+      min-height:0;
+      height:100%;
     }
     .transfer-badge{
       width:118px;
@@ -257,8 +262,8 @@
     @media (max-width:700px){
       .wrap{padding:12px}
       .hero{padding:18px}
-      .resource-bar{align-items:stretch;flex-direction:column}
-      .resource-input{width:100%}
+      .resource-bar{grid-template-columns:1fr;align-items:stretch}
+      .resource-input{width:100%;justify-self:stretch}
       .row{align-items:stretch;flex-direction:column}
       .btn.remove{align-self:flex-end}
       .result-grid{grid-template-columns:1fr}
